@@ -1,12 +1,13 @@
 const User = require("../models/userModel");
 const { createJWT } = require("../config/jwt.config");
 const { StatusCodes } = require("http-status-codes");
-const BadRequestError = require("../errors/bad-request")
+const { BadRequestError, NotFoundError } = require("../errors");
+const { use } = require("express/lib/router");
 
 const registerUser = async (req, res) => {
   const user = await User.create({ ...req.body });
-  const token = createJWT(user);
-  res.status(StatusCodes.CREATED).json({ user: { name: user.name }, token });
+  const jwt = createJWT(user);
+  res.status(StatusCodes.CREATED).json({ success: true, data: { name: user.name, jwt }});
 };
 
 const loginUser = async (req, res) => {
@@ -15,7 +16,21 @@ const loginUser = async (req, res) => {
   if (!email || !password) {
     throw new BadRequestError("Please provide email and password");
   }
-  res.status(StatusCodes.OK).json({ email: email, password: password });
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new NotFoundError(`The email: ${email} is not registered`);
+  } else {
+    const checkPassword = await user.comparePassword(password);
+
+    if (!checkPassword) {
+      throw new BadRequestError("password is incorrect");
+    }
+    const jwt = createJWT(user);
+    res.status(StatusCodes.OK).json({ success: true, data: { name: user.name, jwt }});
+  }
+
 };
 
 module.exports = { registerUser, loginUser };

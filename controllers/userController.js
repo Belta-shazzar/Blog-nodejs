@@ -2,12 +2,11 @@ const User = require("../models/userModel");
 const { createJWT } = require("../config/jwt.config");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
-const { use } = require("express/lib/router");
 
 const registerUser = async (req, res) => {
   const user = await User.create({ ...req.body });
   const jwt = createJWT(user);
-  res.status(StatusCodes.CREATED).json({ success: true, data: { name: user.name, jwt }});
+  res.status(StatusCodes.CREATED).json({ success: true, data: { name: user.name }, jwt });
 };
 
 const loginUser = async (req, res) => {
@@ -28,7 +27,7 @@ const loginUser = async (req, res) => {
       throw new BadRequestError("password is incorrect");
     }
     const jwt = createJWT(user);
-    res.status(StatusCodes.OK).json({ success: true, data: { name: user.name, jwt }});
+    res.status(StatusCodes.OK).json({ success: true, data: { name: user.name }, jwt });
   }
 
 };

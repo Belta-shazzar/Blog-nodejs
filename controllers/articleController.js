@@ -19,4 +19,17 @@ const addArticle = async (req, res) => {
   });
 };
 
-module.exports = { addArticle };
+// add pagination later
+const getAllArticle = async (req, res) => {
+  const articles = await Article.find({}, "_id title likes dislikes").sort("createdAt");
+  res.status(StatusCodes.OK).json({
+    success: true,
+    nbHits: articles.length,
+    articles
+  });
+};
+
+module.exports = { addArticle, getAllArticle };
+
+
+// https://mongoosejs.com/docs/queries.html

@@ -10,10 +10,15 @@ const ArticleSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  author: {
+  authorID: {
     type: mongoose.Types.ObjectId,
     ref: "User",
     required: true
+  },
+  authorName: {
+    type: String,
+    required: true,
+    trim: true
   },
   views: {
     type: Number,

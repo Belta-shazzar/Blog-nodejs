@@ -1,6 +1,7 @@
 const Article = require("../models/articleModel");
 const { StatusCodes } = require("http-status-codes");
 const { NotFoundError } = require("../errors");
+const { findOneAndDelete } = require("../models/articleModel");
 
 const addArticle = async (req, res) => {
   req.body.authorID = req.user.userId;
@@ -34,7 +35,10 @@ const getAllArticle = async (req, res) => {
 
 const getAnArticle = async (req, res) => {
   const { id: articleID } = req.params;
-  const article = await Article.findOne({ _id: articleID }, "_id title body authorID authorName views likes dislikes createdAt");
+  const article = await Article.findOne(
+    { _id: articleID },
+    "_id title body authorID authorName views likes dislikes createdAt"
+  );
 
   if (!article) {
     throw new NotFoundError("Article does not exist");
@@ -43,6 +47,32 @@ const getAnArticle = async (req, res) => {
   res.status(StatusCodes.OK).json({ success: true, article });
 };
 
-module.exports = { addArticle, getAllArticle, getAnArticle };
+const updateAnArticle = async (req, res) => {
+  const { id: articleID } = req.params;
+  const authorID = req.user.userId;
+
+  const article = await Article.findOneAndUpdate({ _id: articleID, authorID: authorID }, req.body, {
+    new: true,
+  });
+
+  if (!article) {
+    throw new NotFoundError("Article not found")
+  }
+  res.status(StatusCodes.OK).json({ success: true, article });
+};
+
+const deleteAnArticle = async (req, res) => {
+  const { id: articleID } = req.params;
+  const authorID = req.user.userId;
+
+  const article = await Article.findOneAndDelete({ _id: articleID, authorID: authorID });
+
+  if (!article) {
+    throw new NotFoundError("Article not found")
+  }
+  res.status(StatusCodes.OK).json({ success: true });
+}
+
+module.exports = { addArticle, getAllArticle, getAnArticle, updateAnArticle, deleteAnArticle };
 
 // https://mongoosejs.com/docs/queries.html

@@ -93,6 +93,11 @@ const deleteAnArticle = async (req, res) => {
   res.status(StatusCodes.OK).json({ success: true });
 };
 
+const deleteArticles = async (req, res) => {
+  const article = await Article.deleteMany({ _id: { $in: req.body.data } });
+  res.status(StatusCodes.OK).json({ success: true, article });
+};
+
 module.exports = {
   addArticle,
   getAllArticle,
@@ -100,6 +105,7 @@ module.exports = {
   getAnArticle,
   updateAnArticle,
   deleteAnArticle,
+  deleteArticles,
 };
 
 // https://mongoosejs.com/docs/queries.html

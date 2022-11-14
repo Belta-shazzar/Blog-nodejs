@@ -9,12 +9,14 @@ const {
   getAnArticle,
   updateAnArticle,
   deleteAnArticle,
+  deleteArticles
 } = require("../controllers/articleController");
 
 const router = express.Router();
 
 router.route("/").post(JWTAuth, validateArticle, addArticle).get(getAllArticle);
-router.route("/my-articles").get(JWTAuth, getMyArticles)
+router.route("/my-articles").get(JWTAuth, getMyArticles);
+router.route("/deleteArticles").delete(JWTAuth, deleteArticles);
 router
   .route("/:id")
   .get(getAnArticle)

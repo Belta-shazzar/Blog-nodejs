@@ -93,10 +93,18 @@ const deleteAnArticle = async (req, res) => {
   res.status(StatusCodes.OK).json({ success: true });
 };
 
+// Delete multiple article by array of ids in req.body
 const deleteArticles = async (req, res) => {
   const article = await Article.deleteMany({ _id: { $in: req.body.data } });
   res.status(StatusCodes.OK).json({ success: true, article });
 };
+
+// To be used in UserController, accessed by a user deleting his account (Optional)
+const deleteClosedAccountArticle = async (userId) => {
+  const articles = await Article.deleteMany({ authorID: userId });
+
+  return articles;
+}
 
 module.exports = {
   addArticle,
@@ -106,6 +114,7 @@ module.exports = {
   updateAnArticle,
   deleteAnArticle,
   deleteArticles,
+  deleteClosedAccountArticle
 };
 
 // https://mongoosejs.com/docs/queries.html

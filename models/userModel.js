@@ -16,10 +16,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, "password field cannot be empty"],
   },
-  newsletterSub: {
-    type: Boolean,
-    default: false,
-  },
+  subscribedUsers: []
 });
 
 UserSchema.pre("save", async function () {

@@ -1,5 +1,5 @@
 const User = require("../models/userModel");
-const { deleteClosedAccountArticle } = require("./articleController")
+const { deleteClosedAccountArticle } = require("./articleController");
 const { createJWT } = require("../config/jwt.config");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
@@ -36,21 +36,49 @@ const loginUser = async (req, res) => {
   }
 };
 
+const getAllUser = async (req, res) => {
+  const users = await User.find();
+  res.status(StatusCodes.OK).json({ users })
+}
+
 const deleteAccount = async (req, res) => {
-  const { alsoDeleteArticles } = req.body
-  const { userId } = req.user
+  const { alsoDeleteArticles } = req.body;
+  const { userId } = req.user;
+
+  // Default article msg to be returned
   let articles = {
-    "acknowledged": true,
-    "deletedCount": 0,
-    "Msg": "No article was deleted"
-};
+    acknowledged: true,
+    deletedCount: 0,
+    Msg: "No article was deleted",
+  };
 
   if (alsoDeleteArticles) {
-    articles = await deleteClosedAccountArticle(userId)
+    articles = await deleteClosedAccountArticle(userId);
   }
   const user = await User.findOneAndDelete({ _id: userId });
 
   res.status(StatusCodes.OK).json({ success: true, articles });
 };
 
-module.exports = { registerUser, loginUser, deleteAccount };
+const getAuthorById = async (userId) => {
+  const author = await User.findOne({ _id: userId });
+
+  if (!author) {
+    throw new NotFoundError("Author does not exist");
+  }
+
+  return author;
+};
+
+const updateAuthor = async (author) => {
+  return await author.save();
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  getAllUser,
+  deleteAccount,
+  getAuthorById,
+  updateAuthor,
+};

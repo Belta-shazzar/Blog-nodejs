@@ -2,7 +2,9 @@ const SubUser = require("../models/subscribedUsers");
 const { transpoter, sendSubscriberMail } = require("../config/email.config");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError } = require("../errors");
+const { getAuthorById, updateAuthor } = require("./userController");
 
+// req.body only contains email
 const userGeneralSubscription = async (req, res) => {
   const checkEmail = await SubUser.findOne({ email: req.body.email });
   req.body.generalSub = true;
@@ -27,10 +29,35 @@ const userGeneralSubscription = async (req, res) => {
 
   //   Thank you for subscribing mail
   const subject = "Blog Welcome";
-  await transpoter.sendMail(sendSubscriberMail(req.body.email, subject, "Welcome to the amazing blog"));
+  await transpoter.sendMail(
+    sendSubscriberMail(req.body.email, subject, "Welcome to the amazing blog")
+  );
   res
     .status(statusCode)
     .json({ success: true, msg: "subscription successful" });
 };
 
-module.exports = { userGeneralSubscription };
+// req.body contains email and author's ID
+const subscribeToAnAuthor = async (req, res) => {
+  const subscribedEmail = req.body.email;
+  const authorId = req.body.authorId;
+  const checkEmail = await SubUser.findOne({ email: subscribedEmail });
+  const author = await getAuthorById(authorId);
+
+  if (checkEmail) {
+    checkEmail.authorSubscription.forEach((id) => {
+      if (id === authorId) {
+        throw new BadRequestError("already subscribed to this author");
+      }
+    });
+    checkEmail.authorSubscription.push(authorId);
+    author.subscribedUsers.push(subscribedEmail);
+
+    await checkEmail.save();
+    await updateAuthor(author);
+  }
+
+  res.status(200).json(checkEmail);
+};
+
+module.exports = { userGeneralSubscription, subscribeToAnAuthor };

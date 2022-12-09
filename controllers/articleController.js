@@ -1,12 +1,16 @@
 const Article = require("../models/articleModel");
 const { StatusCodes } = require("http-status-codes");
 const { NotFoundError } = require("../errors");
+const { notifySubscribedUsers } = require("./userController")
 
 const addArticle = async (req, res) => {
   req.body.authorID = req.user.userId;
   req.body.authorName = req.user.name;
+  const authorID = req.body.authorID
 
   const article = await Article.create(req.body);
+
+  notifySubscribedUsers(authorID, article._id, article.title);
 
   res.status(StatusCodes.CREATED).json({
     status: true,
@@ -52,6 +56,7 @@ const getAnArticle = async (req, res) => {
     { _id: articleID },
     "_id title body authorID authorName views likes dislikes createdAt"
   );
+  console.log(req)
 
   if (!article) {
     throw new NotFoundError("Article does not exist");
@@ -100,11 +105,11 @@ const deleteArticles = async (req, res) => {
 };
 
 // To be used in UserController, accessed by a user deleting his account (Optional)
-const deleteClosedAccountArticle = async (userId) => {
-  const articles = await Article.deleteMany({ authorID: userId });
+// const deleteClosedAccountArticle = async (userId) => {
+//   const articles = await Article.deleteMany({ authorID: userId });
 
-  return articles;
-}
+//   return articles;
+// }
 
 module.exports = {
   addArticle,
@@ -114,7 +119,7 @@ module.exports = {
   updateAnArticle,
   deleteAnArticle,
   deleteArticles,
-  deleteClosedAccountArticle
+  // deleteClosedAccountArticle
 };
 
 // https://mongoosejs.com/docs/queries.html

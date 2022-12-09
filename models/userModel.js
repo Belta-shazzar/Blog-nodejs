@@ -13,19 +13,25 @@ const UserSchema = new mongoose.Schema({
     unique: true,
   },
   password: {
+    // select: false,
     type: String,
     required: [true, "password field cannot be empty"],
   },
-  subscribedUsers: []
+  subscribedUsers: [],
 });
 
 UserSchema.pre("save", async function () {
-  const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_GENSALT));
-  this.password = await bcrypt.hash(this.password, salt);
+  if (this.isNew) {
+    const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_GENSALT));
+    this.password = await bcrypt.hash(this.password, salt);
+  }
 });
 
-UserSchema.methods.comparePassword = async function(userPassword) {
+UserSchema.methods.comparePassword = async function (userPassword) {
   return (isMatch = await bcrypt.compare(userPassword, this.password));
 };
 
 module.exports = mongoose.model("User", UserSchema);
+
+// $2a$10$UEis6hfkEapLwZTT3TB5W.lrB1i6jpEG3335T/inX5qOvtG5dMYBO
+// $2a$10$UEis6hfkEapLwZTT3TB5W.lrB1i6jpEG3335T/inX5qOvtG5dMYBO

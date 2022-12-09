@@ -1,8 +1,10 @@
 const User = require("../models/userModel");
-const { deleteClosedAccountArticle } = require("./articleController");
+// const { deleteClosedAccountArticle } = require("./articleController");
+const Article = require("../models/articleModel");
 const { createJWT } = require("../config/jwt.config");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
+const { transporter, sendSubscriberMail } = require("../config/email.config")
 
 const registerUser = async (req, res) => {
   const user = await User.create({ ...req.body });
@@ -53,7 +55,7 @@ const deleteAccount = async (req, res) => {
   };
 
   if (alsoDeleteArticles) {
-    articles = await deleteClosedAccountArticle(userId);
+    articles = await Article.deleteMany({ authorID: userId });
   }
   const user = await User.findOneAndDelete({ _id: userId });
 
@@ -66,13 +68,34 @@ const getAuthorById = async (userId) => {
   if (!author) {
     throw new NotFoundError("Author does not exist");
   }
-
   return author;
 };
 
-const updateAuthor = async (author) => {
-  return await author.save();
-};
+const addSubUser = async (authorID, subscriberMail) => {
+  const author = await User.findOne({ _id: authorID });
+
+  if (!author) {
+    throw new NotFoundError("Author does not exist");
+  }
+
+  author.subscribedUsers.push(subscriberMail);
+
+  author.save();
+  return author.name
+}
+
+const notifySubscribedUsers = async (authorID, articleID, articleTitle) => {
+  const author = await User.findOne({ _id: authorID }, "name subscribedUsers")
+  const articleUrl = `${process.env.BASE_URL}/api/v1/article/${articleID}`
+  const subject = "New Published Article"
+  const body = `<p>Hello there. \n ${author.name} just published a new article with the title "${articleTitle}". Wanna check it out? \n\n click <a href="${articleUrl}">this</a> link and enjoy your read!</p>`;
+
+  author.subscribedUsers.forEach(subscriberMail => {
+    transporter.sendMail(
+      sendSubscriberMail(subscriberMail, subject, body)
+    );
+  })
+}
 
 module.exports = {
   registerUser,
@@ -80,5 +103,6 @@ module.exports = {
   getAllUser,
   deleteAccount,
   getAuthorById,
-  updateAuthor,
+  addSubUser,
+  notifySubscribedUsers
 };

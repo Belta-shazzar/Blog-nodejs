@@ -1,5 +1,5 @@
 const SubUser = require("../models/subscribedUsers");
-const { transporter, sendSubscriberMail } = require("../config/email.config");
+const { mailDetails } = require("../config/email.config");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError } = require("../errors");
 const { getAuthorById, addSubUser } = require("./userController");
@@ -12,7 +12,7 @@ const userGeneralSubscription = async (req, res) => {
   let statusCode;
 
   if (!checkEmail) {
-    subUser = await SubUser.create(req.body);
+    // subUser = await SubUser.create(req.body);
     statusCode = StatusCodes.CREATED;
   } else if (checkEmail && checkEmail.generalSub === false) {
     subUser = await SubUser.findOneAndUpdate(
@@ -29,9 +29,8 @@ const userGeneralSubscription = async (req, res) => {
 
   //   Thank you for subscribing mail
   const subject = "Blog Welcome";
-  await transporter.sendMail(
-    sendSubscriberMail(req.body.email, subject, "<h3>Welcome to the amazing blog</h3>")
-  );
+  mailDetails(req.body.email, subject, "./views/newsLetterEmailTemp.html");
+
   res
     .status(statusCode)
     .json({ success: true, msg: "subscription successful" });
@@ -55,11 +54,16 @@ const subscribeToAnAuthor = async (req, res) => {
 
     await checkEmail.save();
   } else {
-    const subUser = await SubUser.create({ email: subscribedEmail, authorSubscription: [authorId] })
+    const subUser = await SubUser.create({
+      email: subscribedEmail,
+      authorSubscription: [authorId],
+    });
   }
   const authorName = await addSubUser(authorId, subscribedEmail);
 
-  res.status(200).json({ msg: `${subscribedEmail} is now subscribed to ${authorName}.`});
+  res
+    .status(200)
+    .json({ msg: `${subscribedEmail} is now subscribed to ${authorName}.` });
 };
 
 module.exports = { userGeneralSubscription, subscribeToAnAuthor };

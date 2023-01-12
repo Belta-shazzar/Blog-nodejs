@@ -1,7 +1,7 @@
 const Article = require("../models/articleModel");
-const SubUser = require("../models/subscribedUsers")
+const SubUser = require("../models/subscribedUsers");
 const dayjs = require("dayjs");
-const ejs = require("ejs")
+const ejs = require("ejs");
 const cron = require("node-cron");
 const { mailDetails } = require("../config/email.config");
 
@@ -19,19 +19,21 @@ const newsletter = async () => {
 
   const thisWeeksArticle = [];
   articles.forEach((article) => {
-    if (dayjs(article.createdAt).isAfter(prevNewsLetter)) {
-      thisWeeksArticle.push(article);
-    }
+    // if (dayjs(article.createdAt).isAfter(prevNewsLetter)) {
+    const date = new Date(article.createdAt);
+    article.created = date.toDateString();
+    article.url = `${process.env.BASE_URL}/api/v1/article/${article._id}`;
+    // console.log(article.url)
+    thisWeeksArticle.push(article);
+    // }
   });
 
-  ejs.render("")
-
-  return thisWeeksArticle;
+  return ejs.renderFile("./views/newsLetterEmailTemp.ejs", { articles: articles });
 };
 
 const generalSubscribersMail = async () => {
   return await SubUser.find({ generalSub: true }, "email");
-}
+};
 
 // cron.schedule("* * * * *", async () => {
 //   console.log("running a task every minute");

@@ -1,4 +1,4 @@
-const express = require("express");
+ const express = require("express");
 const { validateUser } = require("../middleware/userValidation");
 const { JWTAuth } = require("../config/jwt.config");
 

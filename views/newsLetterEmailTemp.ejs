@@ -131,49 +131,26 @@
     </header>
 
     <ul>
+      <% if (articles.length > 0) { %> <% for (let i = 0; i < articles.length;
+      i++) { %>
       <li class="list-items">
         <div class="list-content">
-          <h2 class="title">
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-          </h2>
-          <p class="author">Destiny Abel</p>
+          <h2 class="title"><%= articles[i].title %></h2>
+          <p class="author"><%= articles[i].authorName %></p>
           <span>
-            <p class="date">2023-01-08</p>
-            <p class="likes"><i class="fas fa-thin fa-heart"></i> 827</p>
+            <p class="date"><%= articles[i].created %></p>
+            <p class="likes">
+              <i class="fas fa-thin fa-heart"></i> <%= articles[i].likes %> likes
+            </p>
           </span>
         </div>
         <span class="move-btn">
-          <a href="#" class="btn">read me</a>
+          <a href=<%= articles[i].url %> class="btn">read me</a>
         </span>
       </li>
-      <li class="list-items">
-        <div class="list-content">
-          <h2 class="title">
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Magnam.
-          </h2>
-          <p class="author">Tech Glory</p>
-          <span>
-            <p class="date">2023-01-03</p>
-            <p class="likes"><i class="fas fa-thin fa-heart"></i> 685</p>
-          </span>
-        </div>
-        <span class="move-btn">
-          <a href="#" class="btn">read me</a>
-        </span>
-      </li>
-      <li class="list-items">
-        <div class="list-content">
-          <h2 class="title">Lorem ipsum dolor sit amet consectetur.</h2>
-          <p class="author">Sarah Jane</p>
-          <span>
-            <p class="date">2023-01-02</p>
-            <p class="likes"><i class="fas fa-thin fa-heart"></i> 12k</p>
-          </span>
-        </div>
-        <span class="move-btn">
-          <a href="#" class="btn">read me</a>
-        </span>
-      </li>
+      <% } %> <% } else { %>
+      <p></p>
+      <% } %>
     </ul>
   </body>
 </html>

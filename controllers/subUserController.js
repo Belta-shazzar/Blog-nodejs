@@ -2,6 +2,7 @@ const SubUser = require("../models/subscribedUsers");
 const { mailDetails } = require("../config/email.config");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError } = require("../errors");
+const { newsletter } = require("../service/subUserService")
 const { getAuthorById, addSubUser } = require("./userController");
 
 // req.body only contains email
@@ -27,9 +28,9 @@ const userGeneralSubscription = async (req, res) => {
     throw new BadRequestError("an error occurred");
   }
 
-  //   Thank you for subscribing mail
+  const htmlFile = await newsletter();
   const subject = "Blog Welcome";
-  mailDetails(req.body.email, subject, "./views/newsLetterEmailTemp.html");
+  mailDetails(req.body.email, subject, htmlFile);
 
   res
     .status(statusCode)

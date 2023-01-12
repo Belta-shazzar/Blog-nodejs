@@ -14,6 +14,8 @@ const errorHandlerMiddleware = require("./middleware/error-handler");
 
 const app = express();
 
+app.set("view engine", "ejs");
+
 app.use(express.json());
 
 app.use("/api/v1/user", userRouter);

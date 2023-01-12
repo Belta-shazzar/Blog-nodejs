@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 
 const connectDB = (url) => {
-    return mongoose.connect(url).then(() => console.log("CONNECTED TO THE DATABASE"));
-}
+  return mongoose
+    .connect(url)
+    .then(() => console.log("CONNECTED TO THE DATABASE"));
+};
 
 module.exports = connectDB;

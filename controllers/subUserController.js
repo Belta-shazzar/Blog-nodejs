@@ -13,7 +13,7 @@ const userGeneralSubscription = async (req, res) => {
   let statusCode;
 
   if (!checkEmail) {
-    // subUser = await SubUser.create(req.body);
+    subUser = await SubUser.create(req.body);
     statusCode = StatusCodes.CREATED;
   } else if (checkEmail && checkEmail.generalSub === false) {
     subUser = await SubUser.findOneAndUpdate(
@@ -28,7 +28,7 @@ const userGeneralSubscription = async (req, res) => {
     throw new BadRequestError("an error occurred");
   }
 
-  const htmlFile = await newsletter();
+  const htmlFile ="<h1>Hello new subscriber</h1>"; //Come back
   const subject = "Blog Welcome";
   mailDetails(req.body.email, subject, htmlFile);
 

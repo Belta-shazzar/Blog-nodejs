@@ -4,7 +4,8 @@ const Article = require("../models/articleModel");
 const { createJWT } = require("../config/jwt.config");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequestError, NotFoundError } = require("../errors");
-const { transporter, sendSubscriberMail } = require("../config/email.config")
+const { mailDetails } = require("../config/email.config");
+const { generalSubscribersMail } = require("../service/subUserService");
 
 const registerUser = async (req, res) => {
   const user = await User.create({ ...req.body });
@@ -40,8 +41,8 @@ const loginUser = async (req, res) => {
 
 const getAllUser = async (req, res) => {
   const users = await User.find();
-  res.status(StatusCodes.OK).json({ users })
-}
+  res.status(StatusCodes.OK).json({ users });
+};
 
 const deleteAccount = async (req, res) => {
   const { alsoDeleteArticles } = req.body;
@@ -81,21 +82,17 @@ const addSubUser = async (authorID, subscriberMail) => {
   author.subscribedUsers.push(subscriberMail);
 
   author.save();
-  return author.name
-}
+  return author.name;
+};
 
 const notifySubscribedUsers = async (authorID, articleID, articleTitle) => {
-  const author = await User.findOne({ _id: authorID }, "name subscribedUsers")
-  const articleUrl = `${process.env.BASE_URL}/api/v1/article/${articleID}`
-  const subject = "New Published Article"
+  const author = await User.findOne({ _id: authorID }, "name subscribedUsers");
+  const articleUrl = `${process.env.BASE_URL}/api/v1/article/${articleID}`;
+  const subject = "New Published Article";
   const body = `<p>Hello there. \n ${author.name} just published a new article with the title "${articleTitle}". Wanna check it out? \n\n click <a href="${articleUrl}">this</a> link and enjoy your read!</p>`;
 
-  author.subscribedUsers.forEach(subscriberMail => {
-    transporter.sendMail(
-      sendSubscriberMail(subscriberMail, subject, body)
-    );
-  })
-}
+  mailDetails(author.subscribedUsers, subject, body);
+};
 
 module.exports = {
   registerUser,
@@ -104,5 +101,5 @@ module.exports = {
   deleteAccount,
   getAuthorById,
   addSubUser,
-  notifySubscribedUsers
+  notifySubscribedUsers,
 };

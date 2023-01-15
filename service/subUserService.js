@@ -17,46 +17,39 @@ const newsletter = async () => {
       createdAt: -1,
     });
 
-  const thisWeeksArticle = [];
+  const thisWeeksArticles = [];
   articles.forEach((article) => {
-    // if (dayjs(article.createdAt).isAfter(prevNewsLetter)) {
-    const date = new Date(article.createdAt);
-    article.created = date.toDateString();
-    article.url = `${process.env.BASE_URL}/api/v1/article/${article._id}`;
-    // console.log(article.url)
-    thisWeeksArticle.push(article);
-    // }
+    if (dayjs(article.createdAt).isAfter(prevNewsLetter)) {
+      const date = new Date(article.createdAt);
+      article.created = date.toDateString();
+      article.url = `${process.env.BASE_URL}/api/v1/article/${article._id}`;
+      thisWeeksArticles.push(article);
+    }
   });
 
-  return ejs.renderFile("./views/newsLetterEmailTemp.ejs", { articles: articles });
+  return await ejs.renderFile("./views/newsLetterEmailTemp.ejs", {
+    articles: thisWeeksArticles,
+  });
 };
 
 const generalSubscribersMail = async () => {
-  return await SubUser.find({ generalSub: true }, "email");
+  const genSubUSersMail = [];
+  const genSubUsers = await SubUser.find({ generalSub: true }, "email");
+
+  genSubUsers.forEach((user) => genSubUSersMail.push(user.email));
+  return genSubUSersMail;
 };
 
-// cron.schedule("* * * * *", async () => {
-//   console.log("running a task every minute");
-//   const subject = "Weekly newsletter from Shazzar";
-//   await transporter.sendMail(
-//     mailDetails(
-//       generalSubscribersMail(),
-//       subject,
-//       "<h3>Welcome to the amazing blog</h3>"
-//     )
-//   );
-// });
-
-/* Steps 
-    Get top 20 most liked or commented-on articles from saturday (Exact time when last newsletter was published to date.now)
-    {title, likes, comments}
-
-    Get emails of subscribed users with general sub == true
-
-    create email template
-    Send mail on saturdays by 6pm
-*/
+// https://crontab.guru/#*_*_*_*_*
+cron.schedule("0 18 * * 6", async () => {
+  console.log("running a task at specified time");
+  const subject = "Weekly newsletter from Shaz Blog";
+  const recipients = await generalSubscribersMail();
+  const htmlFile = await newsletter();
+  mailDetails(recipients, subject, htmlFile);
+});
 
 module.exports = {
   newsletter,
+  generalSubscribersMail,
 };

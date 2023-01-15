@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
-const fs = require("fs");
 
 const mailDetails = (recipient, subject, htmlFile) => {
+  console.log(recipient)
   //email host information
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -14,14 +14,7 @@ const mailDetails = (recipient, subject, htmlFile) => {
 
   transporter.sendMail({
     from: process.env.AUTH_EMAIL,
-    to: [
-      "dymojaxik@tafmail.com",
-      "bozicex@givmail.com",
-      "rubehu@inboxbear.com",
-      "helov@robot-mail.com",
-      "pelifoc@getairmail.com",
-      recipient,
-    ],
+    to: recipient,
     subject: subject,
     html: htmlFile, //Work on the html temlate. (It looks very terrible)
   });
@@ -30,23 +23,3 @@ const mailDetails = (recipient, subject, htmlFile) => {
 };
 
 module.exports = { mailDetails };
-
-// fs.readFile(
-//   path,
-//   { encoding: "utf-8" },
-//   (err, data) => {
-//     let htmlFile = data;
-//     htmlFile = htmlFile.replace("#replaceWithLink#", "myOtherLinkTest");
-
-//     if (err) {
-//       console.warn("Error getting password reset template: " + err);
-//     } else {
-//       transporter.sendMail({
-//         from: `"Shazzar :)" ${process.env.AUTH_EMAIL}`,
-//         to: recipient,
-//         subject: subject,
-//         html: htmlFile, //Work on the html temlate. (It looks very terrible)
-//       });
-//     }
-//   }
-// );
